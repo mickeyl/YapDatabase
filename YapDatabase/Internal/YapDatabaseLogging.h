@@ -64,12 +64,13 @@
  * Instead, you should override the default values in your own application.
 **/
 
+#define YapDatabaseLoggingTechnique_LTSupportCore 3 //
 #define YapDatabaseLoggingTechnique_Lumberjack 2 // optimal
 #define YapDatabaseLoggingTechnique_NSLog      1 // slower
 #define YapDatabaseLoggingTechnique_Disabled   0 // disabled
 
 #ifndef YapDatabaseLoggingTechnique
-#define YapDatabaseLoggingTechnique YapDatabaseLoggingTechnique_Lumberjack
+#define YapDatabaseLoggingTechnique YapDatabaseLoggingTechnique_LTSupportCore
 #endif
 
 /**
@@ -114,6 +115,27 @@ NSString *YDBExtractFileNameWithoutExtension(const char *filePath);
 
 #define YDBLogTrace(frmt, ...) YDBLogMaybe(YDB_LOG_FLAG_TRACE, (@"%@: " frmt), THIS_FILE, ##__VA_ARGS__)
 #define YDBLogAutoTrace()      YDBLogMaybe(YDB_LOG_FLAG_TRACE,  @"%@: %@",     THIS_FILE, THIS_METHOD)
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#elif (YapDatabaseLoggingTechnique == YapDatabaseLoggingTechnique_LTSupportCore)
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#import <LTSupportCore/late_debug.h>
+
+extern int YapDatabaseLogLevel;
+
+// Logging Enabled.
+// Logging uses LOG calls from LTSupportCore
+
+#define YDBLogMaybe(flg, frmt, ...) \
+do{ if(YapDatabaseLogLevel & flg) LOG( frmt, ##__VA_ARGS__) } while(0)
+
+#define YDBLogError(frmt, ...)    YDBLogMaybe(YDB_LOG_FLAG_ERROR,   frmt, ##__VA_ARGS__)
+#define YDBLogWarn(frmt, ...)     YDBLogMaybe(YDB_LOG_FLAG_WARN,    frmt, ##__VA_ARGS__)
+#define YDBLogInfo(frmt, ...)     YDBLogMaybe(YDB_LOG_FLAG_INFO,    frmt, ##__VA_ARGS__)
+#define YDBLogVerbose(frmt, ...)  YDBLogMaybe(YDB_LOG_FLAG_VERBOSE, frmt, ##__VA_ARGS__)
+
+#define YDBLogTrace(frmt, ...)
+#define YDBLogAutoTrace(frmt, ...) 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #elif (YapDatabaseLoggingTechnique == YapDatabaseLoggingTechnique_NSLog)

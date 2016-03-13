@@ -126,17 +126,30 @@ extern int YapDatabaseLogLevel;
 // Logging Enabled.
 // Logging uses LOG calls from LTSupportCore
 
-#define YDBLogMaybe(flg, frmt, ...) \
-do{ if(YapDatabaseLogLevel & flg) LOG( frmt, ##__VA_ARGS__) } while(0)
+#ifdef LATEDEBUG
 
-#define YDBLogError(frmt, ...)    YDBLogMaybe(YDB_LOG_FLAG_ERROR,   frmt, ##__VA_ARGS__)
-#define YDBLogWarn(frmt, ...)     YDBLogMaybe(YDB_LOG_FLAG_WARN,    frmt, ##__VA_ARGS__)
-#define YDBLogInfo(frmt, ...)     YDBLogMaybe(YDB_LOG_FLAG_INFO,    frmt, ##__VA_ARGS__)
-#define YDBLogVerbose(frmt, ...)  YDBLogMaybe(YDB_LOG_FLAG_VERBOSE, frmt, ##__VA_ARGS__)
+    #define YDBLogMaybe(flg, frmt, ...) \
+    do{ if(YapDatabaseLogLevel & flg) LOG( frmt, ##__VA_ARGS__) } while(0)
 
-#define YDBLogTrace(frmt, ...)
-#define YDBLogAutoTrace(frmt, ...) 
+    #define YDBLogError(frmt, ...)    YDBLogMaybe(YDB_LOG_FLAG_ERROR,   frmt, ##__VA_ARGS__)
+    #define YDBLogWarn(frmt, ...)     YDBLogMaybe(YDB_LOG_FLAG_WARN,    frmt, ##__VA_ARGS__)
+    #define YDBLogInfo(frmt, ...)     YDBLogMaybe(YDB_LOG_FLAG_INFO,    frmt, ##__VA_ARGS__)
+    #define YDBLogVerbose(frmt, ...)  YDBLogMaybe(YDB_LOG_FLAG_VERBOSE, frmt, ##__VA_ARGS__)
 
+    #define YDBLogTrace(frmt, ...)
+    #define YDBLogAutoTrace(frmt, ...)
+
+#else
+
+    #define YDBLogError(frmt, ...)
+    #define YDBLogWarn(frmt, ...)
+    #define YDBLogInfo(frmt, ...)
+    #define YDBLogVerbose(frmt, ...)
+
+    #define YDBLogTrace(frmt, ...)
+    #define YDBLogAutoTrace(frmt, ...)
+
+#endif
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #elif (YapDatabaseLoggingTechnique == YapDatabaseLoggingTechnique_NSLog)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -164,6 +164,13 @@ NS_ASSUME_NONNULL_BEGIN
             sorting:(YapDatabaseViewSorting *)sorting
          versionTag:(nullable NSString *)versionTag;
 
+/**
+ * This method allows you to force a rerun of the existing grouping and sorting blocks to repopulate the view.
+ *
+ * Note: You must pass a different versionTag, or this method does nothing.
+ **/
+- (void)setVersionTag:(NSString *)inVersionTag;
+
 @end
 
 NS_ASSUME_NONNULL_END

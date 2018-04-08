@@ -1577,4 +1577,60 @@
 	}];
 }
 
+/**
+ * This method allows you to force a rerun of the existing grouping and sorting blocks to repopulate the view.
+ *
+ * Note: You must pass a different versionTag, or this method does nothing.
+ **/
+- (void)setVersionTag:(NSString *)inVersionTag
+{
+    YDBLogAutoTrace();
+
+    if (!databaseTransaction->isReadWriteTransaction)
+    {
+        YDBLogWarn(@"%@ - Method only allowed in readWrite transaction", THIS_METHOD);
+        return;
+    }
+
+    NSString *newVersionTag = inVersionTag ? [inVersionTag copy] : @"";
+
+    if ([[self versionTag] isEqualToString:newVersionTag])
+    {
+        YDBLogWarn(@"%@ - versionTag didn't change, so not updating view", THIS_METHOD);
+        return;
+    }
+
+    __unsafe_unretained YapDatabaseAutoViewConnection *viewConnection =
+    (YapDatabaseAutoViewConnection *)parentConnection;
+
+    [self repopulateView];
+
+    [self setStringValue:newVersionTag
+         forExtensionKey:ext_key_versionTag
+              persistent:[self isPersistentView]];
+
+    // Notify any extensions dependent upon this one that we repopulated.
+
+    NSString *registeredName = [self registeredName];
+    NSDictionary *extensionDependencies = databaseTransaction->connection->extensionDependencies;
+
+    [extensionDependencies enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL __unused *stop){
+
+        __unsafe_unretained NSString *extName = (NSString *)key;
+        __unsafe_unretained NSSet *extDependencies = (NSSet *)obj;
+
+        if ([extDependencies containsObject:registeredName])
+        {
+            YapDatabaseExtensionTransaction *extTransaction = [databaseTransaction ext:extName];
+
+            if ([extTransaction respondsToSelector:@selector(view:didRepopulateWithFlags:)])
+            {
+                int flags = YDB_GroupingMayHaveChanged | YDB_SortingMayHaveChanged;
+                [(id <YapDatabaseViewDependency>)extTransaction view:registeredName didRepopulateWithFlags:flags];
+            }
+        }
+    }];
+}
+
+
 @end

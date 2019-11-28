@@ -15,10 +15,6 @@
 #import <objc/runtime.h>
 #import <stdatomic.h>
 
-#if TARGET_OS_IOS || TARGET_OS_TV
-#import <UIKit/UIKit.h>
-#endif
-
 #include "yap_vfs_shim.h"
 
 #if ! __has_feature(objc_arc)
@@ -369,7 +365,7 @@ static int connectionBusyHandler(void *ptr, int count)
 		#if TARGET_OS_IOS || TARGET_OS_TV
 		[[NSNotificationCenter defaultCenter] addObserver:self
 		                                         selector:@selector(didReceiveMemoryWarning:)
-		                                             name:UIApplicationDidReceiveMemoryWarningNotification
+		                                             name:@"UIApplicationDidReceiveMemoryWarningNotification"
 		                                           object:nil];
 		#endif
 	}
